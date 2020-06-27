@@ -1,0 +1,17 @@
+hanzidentifier
+SpeechRecognition
+librosa
+pydub
+pinyin
+tqdm
+numpy
+pandas
+matplotlib
+IPython
+torchvision
+requests
+uuid
+translate
+scikit-learn
+soundfile
+scipy
