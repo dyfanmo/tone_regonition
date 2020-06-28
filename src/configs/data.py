@@ -66,7 +66,7 @@ def get_config(parse=True, **optional_kwargs):
                         help='percentage validation data')
     # Data Request
 
-    parser.add_argument('--limit', type=int, default=3,
+    parser.add_argument('--limit', type=int, default=2,
                         help='request limit for each word')
     parser.add_argument('--api_key', type=str, default='2e3cb6041dea7f1b91e9d75e5b1c1415',
                         help='api key')

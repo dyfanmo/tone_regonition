@@ -1,4 +1,3 @@
-import os
 import sys
 import os.path as path
 from torch.utils.data import DataLoader
@@ -34,8 +33,8 @@ def prepare_data(train, valid, test, duration=2, train_batch_size=16, val_batch_
     test_data = ToneData(test, 'labels', duration)
     test_loader = DataLoader(test_data, batch_size=test_batch_size, shuffle=True)
 
-    if not os.path.isdir(AUDIO_PATH):
-        os.mkdir(AUDIO_PATH)
+    if not os.path.isdir(INTERIM_PATH):
+        os.mkdir(INTERIM_PATH)
 
     save_object(train_loader, f'{INTERIM_PATH}/train_loader.pkl')
     save_object(valid_loader, f'{INTERIM_PATH}/valid_loader.pkl')
