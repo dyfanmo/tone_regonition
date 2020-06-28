@@ -34,7 +34,7 @@ python data_loader.py
 ```
 
 # Run
-You can see more configurations in [src/configs](configs) folder
+You can see more configurations in [configs](src/configs) folder
 
 ## Train
 ```sh
