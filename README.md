@@ -6,10 +6,9 @@ Train a machine learning model to classify tones in Chinese through audio files.
 
 ## 1) Hardware
 * All experiments in paper were conducted with single K80 GPU (24GB).
-* You might want to adjust the size of batch and models for your memory size.
 
 ## 2) Software
-* Ubuntu 16.04 or 18.04 (Not tested with other versions, but might work)
+* Ubuntu 18.04 
 * Python 3.6+
   - `pip install -r requirements.txt` 
 
