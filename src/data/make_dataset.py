@@ -1,24 +1,21 @@
+import os
 import io
 import sys
 import wave
 import uuid
 import time
-import pickle
 import requests
-import numpy as np
-import pandas as pd
 import hanzidentifier
-from tqdm import tqdm
 import os.path as path
 from pydub import AudioSegment
 
 ROOT_DIR = path.abspath(path.join(__file__ ,"../../.."))
 sys.path.insert(1, f"{ROOT_DIR}")
-import src.utils as utils
+from src.utils import *
 from src.configs.data import *
 
 
-def extract_words():
+def extract_words(print_total=True):
     try:
         with open(f"{ROOT_DIR}/data/processed/chinese_characters.txt", "rb") as fp:
             chinese_words = pickle.load(fp)
@@ -34,8 +31,9 @@ def extract_words():
                     chinese_words.append(word)
 
         with open(f"{ROOT_DIR}/data/processed/chinese_characters.txt", "wb") as f:
-            pickle.dump(chinese_words, f)
-    print(f"# Total words: {len(chinese_words)}.")
+           pickle.dump(chinese_words, f)
+    if print_total:
+        print(f"# Total words: {len(chinese_words)}.")
     return chinese_words
 
 
@@ -80,6 +78,12 @@ def request_timer():
 def save_pronunciations(mp3_urls):
     audio_list = []
 
+    if not os.path.isdir(DATA_PATH + '/processed/raw'):
+        os.mkdir(DATA_PATH + '/raw')
+
+    if not os.path.isdir(AUDIO_PATH):
+        os.mkdir(AUDIO_PATH)
+
     for i in tqdm(range(0, len(mp3_urls))):
         try:
             unique_filename = str(uuid.uuid4())
@@ -87,7 +91,7 @@ def save_pronunciations(mp3_urls):
             audio_data = r.content
             audio = AudioSegment.from_file(io.BytesIO(audio_data), format="mp3")
             audio_id = f'audio_{unique_filename[:11]}.wav'  # name of each audio file
-            audio.export(f'{ROOT_DIR}/data/raw/Audio/{audio_id}', format='wav')
+            audio.export(f'{AUDIO_PATH}/{audio_id}', format='wav')
             audio_list.append((audio_id, mp3_urls[i][1]))
         except:
             pass
@@ -96,19 +100,17 @@ def save_pronunciations(mp3_urls):
 
 def build_dataframe(audio_list):
     df = pd.DataFrame(audio_list, columns=['id', 'word'])
-    df['tone'] = df['word'].apply(lambda word: utils.text_to_tone(word))
-    df['nframes'] = df['id'].apply(lambda f: wave.open(f'{ROOT_DIR}/data/raw/Audio/{f}').getnframes())
-    df['duration'] = df['id'].apply(lambda f: wave.open(f'{ROOT_DIR}/data/raw/Audio/{f}').getnframes() /
-                                                              wave.open(
-                                                                  f'{ROOT_DIR}/data/raw/Audio/{f}').getframerate())
+    df['tone'] = df['word'].apply(lambda word: text_to_tone(word))
+    df['nframes'] = df['id'].apply(lambda f: wave.open(f'{AUDIO_PATH}/{f}').getnframes())
+    df['duration'] = df['id'].apply(lambda f: wave.open(f'{AUDIO_PATH}/{f}').getnframes() /
+                                              wave.open(f'{AUDIO_PATH}/{f}').getframerate())
     df['labels'] = df['tone'].apply(lambda tone: tone - 1)
 
     try:
-        # appending the previous requested data set
-        print('Apending Previous Data Set!')
-        old_df = pd.read_pickle(f'{ROOT_DIR}/data/processed/audio_df.pkl')
+        old_df = pd.read_pickle(f'{ROOT_DIR}/data/processed/Pickle/audio_df.pkl')
         df = pd.concat([old_df, df], ignore_index=True, sort=True)
         df = df.drop_duplicates('id')
+        print('Appending Previous Data Set!')
     except:
         pass
     return df
@@ -120,7 +122,7 @@ if __name__ == "__main__":
     print("Extracting words!")
     chinese_words = extract_words()
     chinese_df = pd.DataFrame(chinese_words, columns=['word'])
-    chinese_df['tone'] = chinese_df['word'].apply(lambda word: utils.text_to_tone(word))
+    chinese_df['tone'] = chinese_df['word'].apply(lambda word: text_to_tone(word))
 
     # insert API-KEY from https://api.forvo.com/
     config = get_config()
@@ -138,7 +140,7 @@ if __name__ == "__main__":
 
             audio_df = build_dataframe(audio_list)
             print(f"# Total Samples: {len(audio_df)}.")
-            audio_df.to_pickle(f'{ROOT_DIR}/data/processed/audio_df.pkl')
+            audio_df.to_pickle(f'{ROOT_DIR}/data/processed/Pickle/audio_df.pkl')
             print('Process Done!')
         else:
             print('Try again later!')

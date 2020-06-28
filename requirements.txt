@@ -1,5 +1,6 @@
 hanzidentifier
 SpeechRecognition
+SoundFile
 librosa
 pydub
 pinyin
@@ -9,9 +10,6 @@ pandas
 matplotlib
 IPython
 torchvision
-requests
-uuid
 translate
 scikit-learn
-soundfile
-scipy
+requests

@@ -1,29 +1,21 @@
 import sys
-import librosa
 import librosa.display
 import warnings
-import numpy as np
 import os.path as path
-import pandas as pd
 import IPython.display as ipd
 from IPython.display import display
 import matplotlib.pyplot as plt
 
 ROOT_DIR = path.abspath(path.join(__file__ ,"../.."))
 sys.path.insert(1, f"{ROOT_DIR}")
-import src.utils as utils
-
-FIGURES_PATH = f'{ROOT_DIR}/reports/figures'
-AUDIO_PATH = f"{ROOT_DIR}/data/raw/Audio/"
-CLN_AUDIO_PATH = f'{ROOT_DIR}/data/processed/Audio/audio_cln'
-DATA_PATH = f"{ROOT_DIR}/data"
+from src.utils import *
 
 warnings.filterwarnings("ignore")
 
 
 def display_tone_distributions(chinese_words, df):
     chinese_df = pd.DataFrame(chinese_words, columns=['word'])
-    chinese_df['tone'] = chinese_df['word'].apply(lambda word: utils.text_to_tone(word))
+    chinese_df['tone'] = chinese_df['word'].apply(lambda word: text_to_tone(word))
     tone_count0 = chinese_df['tone'].value_counts()
     tone_per0 = tone_count0 / tone_count0.sum()
     tone_count1 = df['tone'].value_counts()
@@ -45,7 +37,7 @@ def play_tones(df):
     for i in range(1, 5):
         tone = df[df['tone'] == i]
         audio = tone.sample(1)
-        display(ipd.Audio(AUDIO_PATH + audio.id.iloc[0]))
+        display(ipd.Audio(AUDIO_PATH + '/' + audio.id.iloc[0]))
 
 
 def display_duration(df):
@@ -80,8 +72,8 @@ def display_specgrams(df):
             for i in range(n_cols * n_rows):
                 audio = df.sample(1)
                 path = f'{AUDIO_PATH}/{audio.id.iloc[0]}'
-                spegram = utils.get_melspectrogram_db(path, duration=3)
-                img = utils.specgram_to_image(spegram)
+                spegram = get_melspectrogram_db(path, duration=3)
+                img = specgram_to_image(spegram)
                 index = n_cols * row + col
                 plt.subplot(n_rows, n_cols, index + 1)
             librosa.display.specshow(img, cmap='viridis')
@@ -100,29 +92,14 @@ def display_duration_comparison(audio_data):
             ax[i].set_title('New Duration Distribution')
 
 
-def compare_waveplots(df):
-    random = np.random.randint(0, len(df)-1)
-    index = df.index[random]
-    fig, axs = plt.subplots(1, 2, figsize=(15, 5), sharex=True)
-
-    for i in range(2):
-        audio = df.loc[index]
-        if i == 0:
-            path = f'{ROOT_DIR}/data/processed/Audio/{audio.id}'
-        else:
-            path = f'{ROOT_DIR}/data/raw/Audio/{audio.id}'
-        wav, sr = librosa.load(path, sr=None)
-        axs[i].plot(wav)
-
-
 def display_outliers(df):
     inliers = df[df['anomaly'] == 1]
     outliers = df[df['anomaly'] == -1]
 
     fig = plt.figure(figsize=(15, 10))
     ax = fig.gca(projection='3d')
-    ax.scatter(inliers.pca_X, inliers.pca_Y, inliers.pca_Z, alpha=0.25)
-    ax.scatter(outliers.pca_X, outliers.pca_Y, outliers.pca_Z, alpha=0.25)
+    for data in [inliers, outliers]:
+        ax.scatter(data.PC1, data.PC2, data.PC3, alpha=0.4)
     ax.legend(['Inliers', 'Outliers'])
     ax.set_title('Anomalies')
 
@@ -131,7 +108,7 @@ def play_audio_quality(df):
     high_quality = df[df['sound_quality'] == 0].sample(1).squeeze()
     low_quality = df[df['sound_quality'] == 2].sample(1).squeeze()
     for ser_i in [high_quality, low_quality]:
-        file_path = utils.get_audio_path(ser_i)
+        file_path = get_audio_path(ser_i)
         print(f'Tone: {ser_i.tone}\tSound Quality: {ser_i.sound_quality}\tAudio Type: {ser_i.audio_type}')
         display(ipd.Audio(file_path))
 
@@ -139,7 +116,7 @@ def play_audio_quality(df):
 def play_audio_length(df):
     df = df.sample(1).squeeze()
     print(f'Word: {df.word}, Tone: {df.tone}')
-    for path in [CLN_AUDIO_PATH, AUDIO_PATH]:
+    for path in [CLEAN_PATH, AUDIO_PATH]:
         display(ipd.Audio(f'{path}/{df.id}'))
 
 
@@ -148,20 +125,20 @@ def play_anomalies(df, num=1):
         outlier = df[df['anomaly'] == -1].sample(1).squeeze()
         inlier = df[df['anomaly'] == 1].sample(1).squeeze()
         for ser_i in [inlier, outlier]:
-            file_path = utils.get_audio_path(ser_i)
+            file_path = get_audio_path(ser_i)
             print(f'Tone: {ser_i.tone}\tAnomaly: {ser_i.anomaly}\tAudio Type: {ser_i.audio_type}')
             display(ipd.Audio(file_path))
 
 
 def play_aug(df):
     row = df.sample(1)
-    path = f'{ROOT_DIR}/data/processed/Audio/audio_cln/{row.id.iloc[0]}'
+    path = f'{CLEAN_PATH}/{row.id.iloc[0]}'
     wav, sr = librosa.load(path)
 
     wn = np.random.randn(len(wav))
     wav_wn = wav + 0.005 * wn
-    wav_dp = utils.change_pitch(wav, sr, deep=True)
-    wav_hi = utils.change_pitch(wav, sr, deep=False)
+    wav_dp = change_pitch(wav, sr, deep=True)
+    wav_hi = change_pitch(wav, sr, deep=False)
     wav_rl = np.roll(wav, sr)
     for wav_i in [wav, wav_wn, wav_dp, wav_hi, wav_rl]:
         display(ipd.Audio(wav_i, rate=sr))
@@ -169,15 +146,15 @@ def play_aug(df):
 
 def display_aug(df):
     row = df.sample(1)
-    path = f'{ROOT_DIR}/data/processed/Audio/audio_cln/{row.id.iloc[0]}'
+    path = f'{CLEAN_PATH}/{row.id.iloc[0]}'
     wav, sr = librosa.load(path)
 
     wn = np.random.randn(len(wav))
     wav_wn = wav + 0.005 * wn
-    wav_dp = utils.change_pitch(wav, sr, deep=True)
-    wav_hi = utils.change_pitch(wav, sr, deep=False)
+    wav_dp = change_pitch(wav, sr, deep=True)
+    wav_hi = change_pitch(wav, sr, deep=False)
     wav_rl = np.roll(wav, sr)
-    wav_all = [('Orginal',wav), ('With Noise',wav_wn),('Deep',wav_dp),('High',wav_hi),('Audio Roll', wav_rl)]
+    wav_all = [('Orginal', wav), ('With Noise', wav_wn), ('Deep', wav_dp), ('High', wav_hi), ('Audio Roll', wav_rl)]
     fig, axs = plt.subplots(5,1 , figsize=(17, 10), sharey=True, sharex=True)
     for i, wav_i in enumerate(wav_all):
         axs[i].set_title(wav_i[0])
@@ -194,7 +171,7 @@ def display_pca_types(df):
     fig = plt.figure(figsize=(15, 10))
     ax = fig.add_subplot(1, 1, 1, projection='3d')
     for data in [cl, wn, dp, hf, rl]:
-        ax.scatter(data.pca_X, data.pca_Y, data.pca_Z, alpha=0.3)
+        ax.scatter(data.PC1, data.PC2, data.PC3, alpha=0.4)
     ax.legend(['Original', 'With Noise', 'Deep Pitch', 'High Pitch', 'Rolled Audio'])
     ax.set_title('Audio Types')
 
@@ -208,15 +185,15 @@ def display_pca_tones(df):
     fig = plt.figure(figsize=(15, 10))
     ax = fig.add_subplot(1, 1, 1, projection='3d')
     for data in [tone1, tone2, tone3, tone4]:
-        ax.scatter(data.pca_X, data.pca_Y, data.pca_Z, alpha=0.4)
+        ax.scatter(data.PC1, data.PC2, data.PC3, alpha=0.4)
     ax.legend([1, 2, 3, 4])
     ax.set_title('Tones')
 
 
 def display_model_loss(model):
     name = model.__class__.__name__
-    tl = np.load(f'{DATA_PATH}/processed/scores/tl-{name[:3]}.npy')
-    vl = np.load(f'{DATA_PATH}/processed/scores/vl-{name[:3]}.npy')
+    tl = np.load(f'{DATA_PATH}/scores/tl-{name[:3]}.npy')
+    vl = np.load(f'{DATA_PATH}/scores/vl-{name[:3]}.npy')
 
     fig, ax = plt.subplots(1, 1, figsize=(10, 6), sharey=True)
     ax.plot(tl)
@@ -235,8 +212,8 @@ def compare_model_loss(*models):
     for model in models:
         name = model.__class__.__name__
         names.append(name)
-        tl = np.load(f'{DATA_PATH}/processed/scores/tl-{name[:3]}.npy')
-        vl = np.load(f'{DATA_PATH}/processed/scores/vl-{name[:3]}.npy')
+        tl = np.load(f'{DATA_PATH}/scores/tl-{name[:3]}.npy')
+        vl = np.load(f'{DATA_PATH}/scores/vl-{name[:3]}.npy')
         axs[0].plot(tl)
         axs[1].plot(vl)
     axs[0].legend(names)
@@ -247,4 +224,4 @@ def play_long_audio(df):
     long_audio = df[df.new_duration > 2]
     for i in range(2):
         sample = long_audio.sample(1)
-        display(ipd.Audio(f'{CLN_AUDIO_PATH}/{sample.id.iloc[0]}'))
+        display(ipd.Audio(f'{CLEAN_PATH}/{sample.id.iloc[0]}'))

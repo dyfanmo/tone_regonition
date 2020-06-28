@@ -5,7 +5,6 @@ import torch
 import time
 import getpass
 import random
-import numpy as np
 import os.path as path
 import multiprocessing
 from torch import optim
@@ -16,10 +15,6 @@ sys.path.insert(3, ROOT_DIR)
 from src.utils import *
 from src.configs.train import *
 from src.models.models import SimpleCNN, ComplexCNN, DeepCNN
-
-MODELS_PATH = f"{ROOT_DIR}/models"
-INTERIM_PATH = f"{ROOT_DIR}/data/interim"
-PROCESSED_PATH = f"{ROOT_DIR}/data/processed"
 
 
 class EarlyStopping:
@@ -147,6 +142,8 @@ def train_model(config, model, loss_fn, train_loader, valid_loader):
         print(f'Epoch - {epoch} Valid-Loss :{valid_loss} Valid-Accuracy : {valid_acc}')
 
         # ------ Checkpoint ------#
+        if not os.path.isdir(MODELS_PATH):
+            os.mkdir(MODELS_PATH)
         filename = f"{MODELS_PATH}/{model_name}.pt"
         if valid_loss < val_loss_min:
             torch.save(model.state_dict(), filename)
@@ -165,8 +162,12 @@ def train_model(config, model, loss_fn, train_loader, valid_loader):
 
     tl = np.mean(train_losses, axis=1)
     vl = np.mean(valid_losses, axis=1)
-    np.save(f'{PROCESSED_PATH}/scores/tl-{model_name[:3]}.npy', tl)
-    np.save(f'{PROCESSED_PATH}/scores/vl-{model_name[:3]}.npy', vl)
+
+    if not os.path.isdir(SCORES_PATH):
+        os.mkdir(SCORES_PATH)
+
+    np.save(f'{SCORES_PATH}/tl-{model_name[:4].upper()}.npy', tl)
+    np.save(f'{SCORES_PATH}/vl-{model_name[:4].upper()}.npy', vl)
     print('Best val Acc: {:4f}'.format(best_acc))
     print('Min val Loss: {:4f}'.format(val_loss_min))
     return model

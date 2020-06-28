@@ -2,7 +2,6 @@ import pinyin
 import librosa
 import pickle
 from torch.utils.data import Dataset
-from scipy.fftpack import fft
 import speech_recognition as sr
 import numpy as np
 import pandas as pd
@@ -10,6 +9,13 @@ from tqdm import tqdm
 import os.path as path
 
 ROOT_DIR = path.abspath(path.join(__file__ ,"../.."))
+DATA_PATH = f"{ROOT_DIR}/data"
+AUDIO_PATH = f"{DATA_PATH}/raw/Audio"
+CLEAN_PATH = f"{DATA_PATH}/processed/Audio/Clean"
+AUGMENTED_PATH = f'{DATA_PATH}/processed/Audio/Augmented'
+INTERIM_PATH = f'{DATA_PATH}/interim'
+SCORES_PATH = f'{DATA_PATH}/scores'
+MODELS_PATH = f"{ROOT_DIR}/models"
 
 
 def speech_to_text(filename):
@@ -93,11 +99,11 @@ def load_object(filename):
 def get_audio_path(ser):
     try:
         if ser.audio_type == 'CL':
-            file_path = f"{ROOT_DIR}/data/processed/Audio/audio_cln/{ser.id}"
+            file_path = f"{ROOT_DIR}/data/processed/Audio/Clean/{ser.id}"
         else:
-            file_path = f"{ROOT_DIR}/data/processed/Audio/audio_aug/{ser.id}"
+            file_path = f"{ROOT_DIR}/data/processed/Audio/Augmented/{ser.id}"
     except:
-        file_path =  f"{ROOT_DIR}/data/raw/Audio/{ser.id}"
+        file_path = f"{ROOT_DIR}/data/raw/Audio/{ser.id}"
     return file_path
 
 
@@ -127,22 +133,13 @@ class ToneData(Dataset):
         return self.data[idx], self.labels[idx]
 
 
-def change_pitch(wav, sr,deep=True):
+def change_pitch(wav, sr, deep=True):
     bins_per_octave = 12
-    pitch_change = np.random.uniform(1, 2)
+    pitch_change = np.random.uniform(0.5, 1.5)
     if deep:
         pitch_change = pitch_change * -1
     wav = librosa.effects.pitch_shift(wav, sr, n_steps=pitch_change, bins_per_octave=bins_per_octave)
     return wav
-
-
-def custom_fft(y, fs):
-    T = 1.0 / fs
-    N = y.shape[0]
-    yf = fft(y)
-    xf = np.linspace(0.0, 1.0/(2.0*T), N//2)
-    vals = 2.0/N * np.abs(yf[0:N//2])
-    return xf, vals
 
 
 def get_tone_distrubtion(chinese_words):

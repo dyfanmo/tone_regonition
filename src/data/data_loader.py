@@ -1,5 +1,5 @@
+import os
 import sys
-import pandas as pd
 import os.path as path
 from torch.utils.data import DataLoader
 
@@ -7,9 +7,7 @@ from torch.utils.data import DataLoader
 ROOT_DIR = path.abspath(path.join(__file__ ,"../../.."))
 sys.path.insert(2, ROOT_DIR)
 from src.configs.data import *
-import src.utils as utils
-
-INTERIM_PATH = f'{ROOT_DIR}/data/interim/'
+from src.utils import *
 
 
 def split_data(df, test_per, val_per):
@@ -27,21 +25,28 @@ def split_data(df, test_per, val_per):
 
 
 def prepare_data(train, valid, test, duration=2, train_batch_size=16, val_batch_size=16, test_batch_size=16):
-    train_data = utils.ToneData(train, 'labels', duration)
+    train_data = ToneData(train, 'labels', duration)
     train_loader = DataLoader(train_data, batch_size=train_batch_size, shuffle=True)
 
-    valid_data = utils.ToneData(valid, 'labels', duration)
+    valid_data = ToneData(valid, 'labels', duration)
     valid_loader = DataLoader(valid_data, batch_size=val_batch_size, shuffle=True)
 
-    test_data = utils.ToneData(test, 'labels', duration)
+    test_data = ToneData(test, 'labels', duration)
     test_loader = DataLoader(test_data, batch_size=test_batch_size, shuffle=True)
+
+    if not os.path.isdir(AUDIO_PATH):
+        os.mkdir(AUDIO_PATH)
+
+    save_object(train_loader, f'{INTERIM_PATH}/train_loader.pkl')
+    save_object(valid_loader, f'{INTERIM_PATH}/valid_loader.pkl')
+    save_object(test_loader, f'{INTERIM_PATH}/test_loader.pkl')
 
     return train_loader, valid_loader, test_loader
 
 
 if __name__ == "__main__":
     config = get_config()
-    audio_pr = pd.read_pickle(f"{ROOT_DIR}/data/processed/audio_pr.pkl")
+    audio_pr = pd.read_pickle(f"{ROOT_DIR}/data/processed/Pickle/audio_pr.pkl")
 
     print('Train Test Split!')
     train, valid, test = split_data(audio_pr, config.test_per, config.val_per)
@@ -49,9 +54,5 @@ if __name__ == "__main__":
     print("Preparing Data!")
     train_loader, valid_loader, test_loader = prepare_data(train, valid, test, 2, config.train_batch_size,
                                                     config.val_batch_size, config.test_batch_size)
-
-    utils.save_object(train_loader, f'{INTERIM_PATH}/train_loader.pkl')
-    utils.save_object(valid_loader, f'{INTERIM_PATH}/valid_loader.pkl')
-    utils.save_object(test_loader, f'{INTERIM_PATH}/test_loader.pkl')
 
     print('Process Done!')

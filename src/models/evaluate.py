@@ -11,10 +11,6 @@ from src.utils import *
 from src.configs.train import *
 
 
-INTERIM_PATH = f"{ROOT_DIR}/data/interim"
-MODELS_PATH = f"{ROOT_DIR}/models"
-
-
 if torch.cuda.is_available():
     device = torch.device('cuda:0')
 else:
