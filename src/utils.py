@@ -17,6 +17,9 @@ INTERIM_PATH = f'{DATA_PATH}/interim'
 SCORES_PATH = f'{DATA_PATH}/scores'
 MODELS_PATH = f"{ROOT_DIR}/models"
 
+# insert API-KEY from https://api.forvo.com/
+API_KEY = '2e3cb6041dea7f1b91e9d75e5b1c1415'
+
 
 def speech_to_text(filename):
     r = sr.Recognizer()

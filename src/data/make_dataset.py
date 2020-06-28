@@ -1,3 +1,4 @@
+import os
 import io
 import sys
 import wave
@@ -115,7 +116,6 @@ def build_dataframe(audio_list):
     return df
 
 
-API_KEY = '2e3cb6041dea7f1b91e9d75e5b1c1415'
 if __name__ == "__main__":
 
     print("Extracting words!")
@@ -123,7 +123,6 @@ if __name__ == "__main__":
     chinese_df = pd.DataFrame(chinese_words, columns=['word'])
     chinese_df['tone'] = chinese_df['word'].apply(lambda word: text_to_tone(word))
 
-    # insert API-KEY from https://api.forvo.com/
     config = get_config()
     API_KEY = config.api_key
     if API_KEY:
