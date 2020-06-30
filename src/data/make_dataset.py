@@ -78,7 +78,7 @@ def request_timer():
 def save_pronunciations(mp3_urls):
     audio_list = []
 
-    if not os.path.isdir(DATA_PATH + '/processed/raw'):
+    if not os.path.isdir(DATA_PATH + '/raw'):
         os.mkdir(DATA_PATH + '/raw')
 
     if not os.path.isdir(AUDIO_PATH):
