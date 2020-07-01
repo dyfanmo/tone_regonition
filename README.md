@@ -5,7 +5,7 @@ Train a machine learning model to classify tones in Chinese through audio files.
 # Prerequisites
 
 ## 1) Hardware
-* All experiments in paper were conducted with single 2060 SUPER GPU (8GB).
+* All experiments in paper were conducted with single RTX 2060 SUPER GPU (8GB).
 
 ## 2) Software
 * Ubuntu 20.04
