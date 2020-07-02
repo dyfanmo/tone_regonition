@@ -1,7 +1,5 @@
 import sys
-import torch
 import tqdm
-from models import *
 import os.path as path
 
 ROOT_DIR = path.abspath(path.join(__file__ ,"../../.."))
@@ -9,12 +7,10 @@ ROOT_DIR = path.abspath(path.join(__file__ ,"../../.."))
 sys.path.insert(1, ROOT_DIR)
 from src.utils import *
 from src.configs.train import *
+from src.models.models import *
 
 
-if torch.cuda.is_available():
-    device = torch.device('cuda:0')
-else:
-    device = torch.device('cpu')
+device = torch.device('cpu')
 
 
 def test_model(model, test_loader):
@@ -44,12 +40,12 @@ if __name__ == "__main__":
 
     simpleCNN = SimpleCNN()
     complexCNN = ComplexCNN()
-    resnet_model = Resnet34
+    deepCNN = DeepCNN()
 
     results = {}
     print('Evaluation start!')
     if config.model == 'ALL':
-        for model in [simpleCNN, complexCNN, resnet_model]:
+        for model in [simpleCNN, complexCNN, deepCNN]:
             result = test_model(model, test_loader)
             results.update(result)
     elif config.model == 'SIM':
@@ -58,8 +54,8 @@ if __name__ == "__main__":
     elif config.model == 'COM':
         result = test_model(complexCNN, test_loader)
         results.update(result)
-    elif config.model == 'RES':
-        result = test_model(resnet_model, test_loader)
+    elif config.model == 'DEP':
+        result = test_model(deepCNN, test_loader)
         results.update(result)
 
     print('Test Set Evaluation Result!')
