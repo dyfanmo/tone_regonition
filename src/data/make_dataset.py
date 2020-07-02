@@ -116,6 +116,9 @@ def build_dataframe(audio_list):
     return df
 
 
+# insert API-KEY from https://api.forvo.com/
+API_KEY = ''
+
 if __name__ == "__main__":
 
     print("Extracting words!")
@@ -124,7 +127,7 @@ if __name__ == "__main__":
     chinese_df['tone'] = chinese_df['word'].apply(lambda word: text_to_tone(word))
 
     config = get_config()
-    API_KEY = config.api_key
+
     if API_KEY:
         print('Requesting data!')
         mp3_urls = request_pronunciations(chinese_words, API_KEY, config.limit)
@@ -145,3 +148,4 @@ if __name__ == "__main__":
     else:
         print('API-KEY not found!')
         print('Insert API-KEY from https://api.forvo.com/ to request data!')
+
