@@ -12,6 +12,8 @@ from src.utils import *
 
 warnings.filterwarnings("ignore")
 
+API_KEY = ''
+
 
 def display_tone_distributions(chinese_words, df):
     chinese_df = pd.DataFrame(chinese_words, columns=['word'])
