@@ -16,9 +16,7 @@ AUGMENTED_PATH = f'{DATA_PATH}/processed/Audio/Augmented'
 INTERIM_PATH = f'{DATA_PATH}/interim'
 SCORES_PATH = f'{DATA_PATH}/scores'
 MODELS_PATH = f"{ROOT_DIR}/models"
-
-# insert API-KEY from https://api.forvo.com/
-API_KEY = ''
+FIGURE_PATH = ROOT_DIR + '/figures'
 
 
 def speech_to_text(filename):
@@ -151,3 +149,4 @@ def get_tone_distrubtion(chinese_words):
     tone_count = chinese_df['tone'].value_counts()
     tone_per = tone_count / tone_count.sum()
     return tone_per
+
