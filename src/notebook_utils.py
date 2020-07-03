@@ -1,3 +1,4 @@
+import os
 import sys
 import librosa.display
 import warnings
@@ -12,11 +13,14 @@ from src.utils import *
 
 warnings.filterwarnings("ignore")
 
-API_KEY = ''
-
+API_KEY = '2e3cb6041dea7f1b91e9d75e5b1c1415'
 
 
 def display_tone_distributions(chinese_words, df, path='tone_distribution.png'):
+
+    if not os.path.isdir(FIGURE_PATH):
+        os.mkdir(FIGURE_PATH)
+
     chinese_df = pd.DataFrame(chinese_words, columns=['word'])
     chinese_df['tone'] = chinese_df['word'].apply(lambda word: text_to_tone(word))
     tone_count0 = chinese_df['tone'].value_counts()
@@ -206,8 +210,8 @@ def display_pca_tones(df):
 
 def display_model_loss(model):
     name = model.__class__.__name__
-    tl = np.load(f'{DATA_PATH}/scores/tl-{name[:3]}.npy')
-    vl = np.load(f'{DATA_PATH}/scores/vl-{name[:3]}.npy')
+    tl = np.load(f'{DATA_PATH}/scores/tl-{name[:4].upper()}.npy')
+    vl = np.load(f'{DATA_PATH}/scores/vl-{name[:4].upper()}.npy')
 
     fig, ax = plt.subplots(1, 1, figsize=(10, 6), sharey=True)
     ax.plot(tl)
@@ -228,8 +232,8 @@ def compare_model_loss(*models):
     for model in models:
         name = model.__class__.__name__
         names.append(name)
-        tl = np.load(f'{DATA_PATH}/scores/tl-{name[:3]}.npy')
-        vl = np.load(f'{DATA_PATH}/scores/vl-{name[:3]}.npy')
+        tl = np.load(f'{DATA_PATH}/scores/tl-{name[:4].upper()}.npy')
+        vl = np.load(f'{DATA_PATH}/scores/vl-{name[:4].upper()}.npy')
         axs[0].plot(tl)
         axs[1].plot(vl)
     axs[0].legend(names)
