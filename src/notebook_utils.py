@@ -15,7 +15,8 @@ warnings.filterwarnings("ignore")
 API_KEY = ''
 
 
-def display_tone_distributions(chinese_words, df):
+
+def display_tone_distributions(chinese_words, df, path='tone_distribution.png'):
     chinese_df = pd.DataFrame(chinese_words, columns=['word'])
     chinese_df['tone'] = chinese_df['word'].apply(lambda word: text_to_tone(word))
     tone_count0 = chinese_df['tone'].value_counts()
@@ -33,6 +34,7 @@ def display_tone_distributions(chinese_words, df):
 
     axs[0].set_title('Real-world Tone Distribution')
     axs[1].set_title('Sampled Data Tone Distribution')
+    plt.savefig(FIGURE_PATH + '/' +path)
 
 
 def play_tones(df):
@@ -46,6 +48,7 @@ def display_duration(df):
     fig, ax = plt.subplots(1, 1, figsize=(15, 5))
     hist = ax.hist(df['duration'], bins=80)
     ax.set_title('Duration')
+    plt.savefig(FIGURE_PATH + '/old_duration.png')
 
 
 def display_waveplots(df):
@@ -63,6 +66,7 @@ def display_waveplots(df):
             librosa.display.waveplot(wav, sr)  # plot wavefile
             plt.title(f'Tone: {audio.tone.iloc[0]}')
             plt.tight_layout()
+    plt.savefig(FIGURE_PATH + '/waveplots.png')
 
 
 def display_specgrams(df):
@@ -80,6 +84,7 @@ def display_specgrams(df):
                 plt.subplot(n_rows, n_cols, index + 1)
             librosa.display.specshow(img, cmap='viridis')
             plt.title(f'Tone:{audio.tone.iloc[0]}')
+    plt.savefig(FIGURE_PATH + '/mel_specgrams.png')
 
 
 def display_duration_comparison(audio_data):
@@ -92,6 +97,7 @@ def display_duration_comparison(audio_data):
             ax[i].set_title('Orginal Duration Distribution')
         else:
             ax[i].set_title('New Duration Distribution')
+    plt.savefig(FIGURE_PATH + '/compare_duration.png')
 
 
 def display_outliers(df):
@@ -104,6 +110,8 @@ def display_outliers(df):
         ax.scatter(data.PC1, data.PC2, data.PC3, alpha=0.4)
     ax.legend(['Inliers', 'Outliers'])
     ax.set_title('Anomalies')
+
+    plt.savefig(FIGURE_PATH + '/pca_outliers.png')
 
 
 def play_audio_quality(df):
@@ -161,6 +169,7 @@ def display_aug(df):
     for i, wav_i in enumerate(wav_all):
         axs[i].set_title(wav_i[0])
         axs[i].plot(wav_i[1])
+    plt.savefig(FIGURE_PATH + '/waveplots_augmented.png')
 
 
 def display_pca_types(df):
@@ -177,6 +186,8 @@ def display_pca_types(df):
     ax.legend(['Original', 'With Noise', 'Deep Pitch', 'High Pitch', 'Rolled Audio'])
     ax.set_title('Audio Types')
 
+    plt.savefig(FIGURE_PATH + '/pca_audio_types.png')
+
 
 def display_pca_tones(df):
     tone1 = df[df['tone'] == 1]
@@ -190,12 +201,13 @@ def display_pca_tones(df):
         ax.scatter(data.PC1, data.PC2, data.PC3, alpha=0.4)
     ax.legend([1, 2, 3, 4])
     ax.set_title('Tones')
+    plt.savefig(FIGURE_PATH + '/pca_tones.png')
 
 
 def display_model_loss(model):
     name = model.__class__.__name__
-    tl = np.load(f'{DATA_PATH}/scores/tl-{name[:4].upper()}.npy')
-    vl = np.load(f'{DATA_PATH}/scores/vl-{name[:4].upper()}.npy')
+    tl = np.load(f'{DATA_PATH}/scores/tl-{name[:3]}.npy')
+    vl = np.load(f'{DATA_PATH}/scores/vl-{name[:3]}.npy')
 
     fig, ax = plt.subplots(1, 1, figsize=(10, 6), sharey=True)
     ax.plot(tl)
@@ -203,6 +215,8 @@ def display_model_loss(model):
     ax.set_xlabel('Epochs')
     ax.legend(['Train Loss', 'Valid Loss'])
     ax.set_title(name)
+
+    plt.savefig(f'{FIGURE_PATH}/loss-{name[:3]}.png')
 
 
 def compare_model_loss(*models):
@@ -214,12 +228,13 @@ def compare_model_loss(*models):
     for model in models:
         name = model.__class__.__name__
         names.append(name)
-        tl = np.load(f'{DATA_PATH}/scores/tl-{name[:4].upper()}.npy')
-        vl = np.load(f'{DATA_PATH}/scores/vl-{name[:4].upper()}.npy')
+        tl = np.load(f'{DATA_PATH}/scores/tl-{name[:3]}.npy')
+        vl = np.load(f'{DATA_PATH}/scores/vl-{name[:3]}.npy')
         axs[0].plot(tl)
         axs[1].plot(vl)
     axs[0].legend(names)
     axs[1].legend(names)
+    plt.savefig(FIGURE_PATH + '/compare_loss.png')
 
 
 def play_long_audio(df):
