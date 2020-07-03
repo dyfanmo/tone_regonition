@@ -1,17 +1,13 @@
 import torch
-
 import torch.nn as nn
 import torch.nn.functional as F
-import os.path as path
-
-ROOT_DIR = path.abspath(path.join(__file__ ,"../../.."))
 
 
 class SimpleCNN(nn.Module):
     def __init__(self):
         super().__init__()
         self.conv1 = nn.Conv2d(1, 32, 5)
-        self.conv2 = nn.Conv2d(32, 64, 5)
+        self.conv2 = nn.Conv2d(32, 64, 3)
 
         x = torch.randn(128, 173).view(-1, 1, 128, 173)
         self._to_linear = None
@@ -43,10 +39,10 @@ class SimpleCNN(nn.Module):
 class ComplexCNN(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(1, 32, 3)
-        self.conv2 = nn.Conv2d(32, 32, 3)
+        self.conv1 = nn.Conv2d(1, 32, 5)
+        self.conv2 = nn.Conv2d(32, 32, 5)
         self.bn1 = nn.BatchNorm2d(32)
-        self.conv3 = nn.Conv2d(32, 64, 3)
+        self.conv3 = nn.Conv2d(32, 64, 5)
         self.conv4 = nn.Conv2d(64, 64, 3)
         self.bn2 = nn.BatchNorm2d(64)
         self.conv5 = nn.Conv2d(64, 128, 3)
@@ -56,7 +52,7 @@ class ComplexCNN(nn.Module):
         self.convs(x)
 
         self.fc1 = nn.Linear(self._to_linear, 512)  # flattening.
-        self.dropout = nn.Dropout(p=0.4)
+        self.dropout = nn.Dropout(p=0.5)
         self.fc2 = nn.Linear(512, 4)
         self.log_softmax = nn.LogSoftmax(dim=1)
 
@@ -88,11 +84,11 @@ class ComplexCNN(nn.Module):
 class DeepCNN(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(1, 32, 3)
-        self.conv2 = nn.Conv2d(32, 32, 3)
+        self.conv1 = nn.Conv2d(1, 32, 5)
+        self.conv2 = nn.Conv2d(32, 32, 5)
         self.bn1 = nn.BatchNorm2d(32)
-        self.conv3 = nn.Conv2d(32, 64, 3)
-        self.conv4 = nn.Conv2d(64, 64, 3)
+        self.conv3 = nn.Conv2d(32, 64, 5)
+        self.conv4 = nn.Conv2d(64, 64, 5)
         self.bn2 = nn.BatchNorm2d(64)
         self.conv5 = nn.Conv2d(64, 128, 3)
         self.conv6 = nn.Conv2d(128, 128, 3)
