@@ -9,7 +9,7 @@ from utils import *
 
 warnings.filterwarnings("ignore")
 
-API_KEY = '2e3cb6041dea7f1b91e9d75e5b1c1415'
+API_KEY = ''
 
 
 def display_tone_dist(chinese_words, df, file_path='tone_distribution.png'):

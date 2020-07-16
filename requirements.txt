@@ -13,3 +13,4 @@ torchvision
 translate
 scikit-learn
 requests
+ffmpeg
