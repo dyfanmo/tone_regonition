@@ -18,7 +18,7 @@ Train a machine learning model to classify tones in Chinese through audio files.
 ```sh
 # Download Audio files.
 mkdir data/raw
-wget https://www.dropbox.com/s/faqkjhp87xrr4d1/Audio.zip?dl=0
+wget https://www.dropbox.com/s/le1bc0e20sshu4b/Audio.zip?dl=0
 unzip Audio.zip
 mv Audio data/raw
 
