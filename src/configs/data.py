@@ -48,7 +48,7 @@ def get_config(parse=True, **optional_kwargs):
     """
     Get configurations as attributes of class
     1. Parse configurations with argparse.
-    2. Create Config class initilized with parsed kwargs.
+    2. Create Config class initialised with parsed kwargs.
     3. Return Config class.
     """
     parser = argparse.ArgumentParser()
@@ -62,13 +62,13 @@ def get_config(parse=True, **optional_kwargs):
                         help='batch size during evaluation')
     parser.add_argument('--test_per', type=float, default=0.05,
                         help='percentage test data')
-    parser.add_argument('--val_per', type=float, default=0.15,
+    parser.add_argument('--val_per', type=float, default=0.10,
                         help='percentage validation data')
     # Data Request
 
     parser.add_argument('--limit', type=int, default=2,
                         help='request limit for each word')
-    parser.add_argument('--api_key', type=str, default='',
+    parser.add_argument('--api_key', type=str, default="2e3cb6041dea7f1b91e9d75e5b1c1415",
                         help='api key')
 
     if parse:

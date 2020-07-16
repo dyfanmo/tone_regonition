@@ -8,14 +8,14 @@ import pandas as pd
 from tqdm import tqdm
 import os.path as path
 
-ROOT_DIR = path.abspath(path.join(__file__ ,"../.."))
-DATA_PATH = f"{ROOT_DIR}/data"
-AUDIO_PATH = f"{DATA_PATH}/raw/Audio"
-CLEAN_PATH = f"{DATA_PATH}/processed/Audio/Clean"
-AUGMENTED_PATH = f'{DATA_PATH}/processed/Audio/Augmented'
-INTERIM_PATH = f'{DATA_PATH}/interim'
-SCORES_PATH = f'{DATA_PATH}/scores'
-MODELS_PATH = f"{ROOT_DIR}/models"
+ROOT_DIR = path.abspath(path.join(__file__, "../.."))
+DATA_PATH = ROOT_DIR + "/data"
+AUDIO_PATH = DATA_PATH + "/raw/Audio"
+CLEAN_PATH = DATA_PATH + "/processed/Audio/Clean"
+AUGMENTED_PATH = DATA_PATH + "/processed/Audio/Augmented"
+INTERIM_PATH = DATA_PATH + "/interim"
+SCORES_PATH = ROOT_DIR + "/data/scores"
+MODELS_PATH = ROOT_DIR + "/models"
 FIGURE_PATH = ROOT_DIR + '/figures'
 
 
@@ -59,18 +59,17 @@ def text_to_tone(text):
 
 
 def match_target_amplitude(aChunk, target_dBFS):
-    ''' Normalize given audio chunk '''
+    """ Normalize given audio chunk """
     change_in_dBFS = target_dBFS - aChunk.dBFS
     return aChunk.apply_gain(change_in_dBFS)
 
 
-def get_melspectrogram_db(file_path, duration=2, n_fft=2048, hop_length=256, n_mels=128, fmin=20, fmax=8300):
-    wav, sr = librosa.load(file_path)
-    input_length = sr * duration
+def get_melspectrogram_db(file_path, duration=3, n_fft=2048, hop_length=512, n_mels=128):
+    wav, rate = librosa.load(file_path)
+    input_length = rate * duration
     wav = librosa.util.fix_length(wav, round(input_length))
 
-    spec = librosa.feature.melspectrogram(wav, sr=sr, n_fft=n_fft,
-                                          hop_length=hop_length, n_mels=n_mels, fmin=fmin, fmax=fmax)
+    spec = librosa.feature.melspectrogram(wav, sr=rate, n_fft=n_fft, hop_length=hop_length, n_mels=n_mels)
     spec_db = librosa.power_to_db(spec, ref=np.max)
 
     return spec_db
@@ -92,8 +91,8 @@ def save_object(obj, filename):
 
 
 def load_object(filename):
-    with open(filename, 'rb') as input:
-        obj = pickle.load(input)
+    with open(filename, 'rb') as data:
+        obj = pickle.load(data)
     return obj
 
 
@@ -134,16 +133,16 @@ class ToneData(Dataset):
         return self.data[idx], self.labels[idx]
 
 
-def change_pitch(wav, sr, deep=True):
+def change_pitch(wav, rate, deep=True):
     bins_per_octave = 12
     pitch_change = np.random.uniform(0.5, 1.5)
     if deep:
         pitch_change = pitch_change * -1
-    wav = librosa.effects.pitch_shift(wav, sr, n_steps=pitch_change, bins_per_octave=bins_per_octave)
+    wav = librosa.effects.pitch_shift(wav, rate, n_steps=pitch_change, bins_per_octave=bins_per_octave)
     return wav
 
 
-def get_tone_distrubtion(chinese_words):
+def get_tone_dist(chinese_words):
     chinese_df = pd.DataFrame(chinese_words, columns=['word'])
     chinese_df['tone'] = chinese_df['word'].apply(lambda word: text_to_tone(word))
     tone_count = chinese_df['tone'].value_counts()

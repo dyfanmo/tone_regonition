@@ -48,7 +48,7 @@ def get_config(parse=True, **optional_kwargs):
     """
     Get configurations as attributes of class
     1. Parse configurations with argparse.
-    2. Create Config class initilized with parsed kwargs.
+    2. Create Config class initialized with parsed kwargs.
     3. Return Config class.
     """
     parser = argparse.ArgumentParser()
@@ -59,11 +59,11 @@ def get_config(parse=True, **optional_kwargs):
                         help='SIM: SimpleCNN / COM: ComplexCNN / DEP: DeepCNN / ALL: All models')
 
     # Training
-    parser.add_argument('--epochs', type=int, default=100,
+    parser.add_argument('--epochs', type=int, default=60,
                         help='num_epochs')
-    parser.add_argument('--patience', type=int, default=10,
+    parser.add_argument('--patience', type=int, default=15,
                         help='early stopping')
-    parser.add_argument('--lr', type=float, default=2e-5,
+    parser.add_argument('--lr', type=float, default=1e-04,
                         help='learning rate')
     parser.add_argument('--optim', type=str, default='adam',
                         choices=['adam', 'amsgrad', 'adagrad'],
@@ -72,8 +72,6 @@ def get_config(parse=True, **optional_kwargs):
                         help='Random seed')
     parser.add_argument('--early_stop', type=str2bool, default=True,
                         help='implementing early stopping')
-    parser.add_argument('--lr_decay', type=str2bool, default=False,
-                        help='learning rate decay')
 
     if parse:
         kwargs = parser.parse_args()
