@@ -19,7 +19,7 @@ class SimpleCNN(nn.Module):
         self.convs(x)
 
         self.fc1 = nn.Linear(self._to_linear, 512)  # flattening.
-        self.dropout = nn.Dropout(p=0.5)
+        self.dropout = nn.Dropout(p=0.4)
         self.fc2 = nn.Linear(512, 4)
         self.log_softmax = nn.LogSoftmax(dim=1)
 
@@ -60,7 +60,7 @@ class ComplexCNN(nn.Module):
         self.convs(x)
 
         self.fc1 = nn.Linear(self._to_linear, 512)  # flattening.
-        self.dropout = nn.Dropout(p=0.5)
+        self.dropout = nn.Dropout(p=0.4)
         self.fc2 = nn.Linear(512, 4)
         self.log_softmax = nn.LogSoftmax(dim=1)
 
@@ -118,7 +118,7 @@ class DeepCNN(nn.Module):
         self.convs(x)
 
         self.fc1 = nn.Linear(self._to_linear, 512)  # flattening.
-        self.dropout = nn.Dropout(p=0.5)
+        self.dropout = nn.Dropout(p=0.4)
         self.fc2 = nn.Linear(512, 4)
         self.log_softmax = nn.LogSoftmax(dim=1)
 
