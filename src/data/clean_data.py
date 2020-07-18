@@ -10,17 +10,18 @@ from sklearn.decomposition import PCA
 from pydub.silence import split_on_silence
 from sklearn.ensemble import IsolationForest
 
-ROOT_DIR = path.abspath(path.join(__file__ ,"../../.."))
+ROOT_DIR = path.abspath(path.join(__file__, "../../.."))
 sys.path.insert(1, ROOT_DIR)
 from src.utils import *
 from src.data.make_dataset import extract_words
+
 pd.options.mode.chained_assignment = None
 
 
 def remove_silence(df):
 
-    if not os.path.isdir(DATA_PATH + '/processed/Audio'):
-        os.mkdir(DATA_PATH + '/processed/Audio')
+    if not os.path.isdir(DATA_PATH + "/processed/Audio"):
+        os.mkdir(DATA_PATH + "/processed/Audio")
 
     if os.path.isdir(CLEAN_PATH):
         cln_files = listdir(CLEAN_PATH)
@@ -29,16 +30,11 @@ def remove_silence(df):
         cln_files = []
 
     for index in tqdm(df.index):
-        id_i = df['id'].loc[index]
+        id_i = df["id"].loc[index]
         song = AudioSegment.from_wav(f"{AUDIO_PATH}/{id_i}")
 
         if id_i not in cln_files:
-            chunks = split_on_silence(
-                song,
-                min_silence_len=300,
-                silence_thresh=-30,
-                keep_silence=300
-            )
+            chunks = split_on_silence(song, min_silence_len=300, silence_thresh=-30, keep_silence=300)
 
             if chunks:
                 for i, chunk in enumerate(chunks):
@@ -46,17 +42,14 @@ def remove_silence(df):
                     audio_chunk = silence_chunk + chunk + silence_chunk
                     normalized_chunk = match_target_amplitude(audio_chunk, -20.0)
 
-                    normalized_chunk.export(
-                        f"{CLEAN_PATH}/{id_i}",
-                        bitrate="192k",
-                        format="wav"
-                    )
+                    normalized_chunk.export(f"{CLEAN_PATH}/{id_i}", bitrate="192k", format="wav")
 
             else:
                 df.drop(index=index, inplace=True)
-    df['new_nframes'] = df['id'].apply(lambda f: wave.open(f'{CLEAN_PATH}/{f}').getnframes())
-    df['new_duration'] = df['id'].apply(lambda f: wave.open(f'{CLEAN_PATH}/{f}').getnframes() /
-                                            wave.open(f'{CLEAN_PATH}/{f}').getframerate())
+    df["new_nframes"] = df["id"].apply(lambda f: wave.open(f"{CLEAN_PATH}/{f}").getnframes())
+    df["new_duration"] = df["id"].apply(
+        lambda f: wave.open(f"{CLEAN_PATH}/{f}").getnframes() / wave.open(f"{CLEAN_PATH}/{f}").getframerate()
+    )
     return df
 
 
@@ -71,13 +64,13 @@ def audio_augmentation(df):
 
     for index in tqdm(df.index):
         row = df.loc[index]
-        path = f'{ROOT_DIR}/data/processed/Audio/Clean/{row.id}'
+        path = f"{ROOT_DIR}/data/processed/Audio/Clean/{row.id}"
 
         id_name = row.id[6:]
-        id_wn = f'audioWN_{id_name}'
-        id_dp = f'audioDP_{id_name}'
-        id_hi = f'audioHF_{id_name}'
-        id_rl = f'audioRL_{id_name}'
+        id_wn = f"audioWN_{id_name}"
+        id_dp = f"audioDP_{id_name}"
+        id_hi = f"audioHF_{id_name}"
+        id_rl = f"audioRL_{id_name}"
 
         if id_rl not in aug_files:
             wav, sr = librosa.load(path)
@@ -92,17 +85,17 @@ def audio_augmentation(df):
 
             for wav_i in wav_list:
                 id_i = wav_i[0]
-                row['id'] = id_i
-                row['audio_type'] = id_i[5:7]
+                row["id"] = id_i
+                row["audio_type"] = id_i[5:7]
                 df_aug = pd.concat([df_aug, pd.DataFrame(row).T])
-                sf.write(f'{AUGMENTED_PATH}/{id_i}', wav_i[1], sr)
+                sf.write(f"{AUGMENTED_PATH}/{id_i}", wav_i[1], sr)
         else:
             for id_i in [id_wn, id_dp, id_hi, id_rl]:
-                row['id'] = id_i
-                row['audio_type'] = id_i[5:7]
+                row["id"] = id_i
+                row["audio_type"] = id_i[5:7]
                 df_aug = pd.concat([df_aug, pd.DataFrame(row).T])
 
-    df['audio_type'] = 'CL'
+    df["audio_type"] = "CL"
     df = pd.concat([df, df_aug])
     df.reset_index(drop=True, inplace=True)
     print(f"# Samples Added: {len(df_aug)} ")
@@ -111,16 +104,16 @@ def audio_augmentation(df):
 
 def speech_recognition_assessment(df):
     df = df.sample(frac=1)
-    df['transcripts'] = np.nan
-    df['pred_tone'] = np.nan
-    df['sound_quality'] = np.nan
+    df["transcripts"] = np.nan
+    df["pred_tone"] = np.nan
+    df["sound_quality"] = np.nan
     audio_checked = []
     old_df = {}
     df_cln = pd.DataFrame()
 
     try:
-        audio_checked = load_object(f'{DATA_PATH}/processed/Pickle/checked_audio.pkl')
-        old_df = pd.read_pickle(f'{DATA_PATH}/processed/Pickle/audio_cln.pkl')
+        audio_checked = load_object(f"{DATA_PATH}/processed/Pickle/checked_audio.pkl")
+        old_df = pd.read_pickle(f"{DATA_PATH}/processed/Pickle/audio_cln.pkl")
     except:
         pass
 
@@ -130,14 +123,14 @@ def speech_recognition_assessment(df):
 
         if id_i in audio_checked:
             df.drop(index=index, inplace=True)
-            row = old_df.loc[old_df['id'] == id_i]
+            row = old_df.loc[old_df["id"] == id_i]
             df_cln = pd.concat([df_cln, row])
         else:
             path = get_audio_path(ser_i)
             transcripts = speech_to_text(path)
 
-            word = df['word'].loc[index]
-            tone = df['tone'].loc[index]
+            word = df["word"].loc[index]
+            tone = df["tone"].loc[index]
 
             if transcripts:
                 cln_transcripts = []
@@ -148,17 +141,17 @@ def speech_recognition_assessment(df):
                                 cln_transcripts.append(text)
 
                 if cln_transcripts:
-                    df['transcripts'].loc[index] = cln_transcripts
+                    df["transcripts"].loc[index] = cln_transcripts
                     pred_tones = [text_to_tone(x) for x in cln_transcripts]
                     if word in cln_transcripts:
-                        df['sound_quality'].loc[index] = 0
-                        df['pred_tone'].loc[index] = tone
+                        df["sound_quality"].loc[index] = 0
+                        df["pred_tone"].loc[index] = tone
                     elif tone in pred_tones:
-                        df['sound_quality'].loc[index] = 1
-                        df['pred_tone'].loc[index] = tone
+                        df["sound_quality"].loc[index] = 1
+                        df["pred_tone"].loc[index] = tone
                     else:
-                        df['sound_quality'].loc[index] = 2
-                        df['pred_tone'].loc[index] = pred_tones[0]  # word with the highest confidence score
+                        df["sound_quality"].loc[index] = 2
+                        df["pred_tone"].loc[index] = pred_tones[0]  # word with the highest confidence score
                 else:
                     df.drop(index=index, inplace=True)
 
@@ -171,8 +164,8 @@ def speech_recognition_assessment(df):
 
     df = df[df.new_duration < 2]
     df.reset_index(drop=True, inplace=True)
-    save_object(audio_checked, f'{DATA_PATH}/processed/Pickle/checked_audio.pkl')
-    df.to_pickle(f'{DATA_PATH}/processed/Pickle/audio_cln.pkl')
+    save_object(audio_checked, f"{DATA_PATH}/processed/Pickle/checked_audio.pkl")
+    df.to_pickle(f"{DATA_PATH}/processed/Pickle/audio_cln.pkl")
     return df
 
 
@@ -190,21 +183,29 @@ def pca_audio(df):
     # Dim reduction
     pca = PCA(n_components=3)
     fft_all = pca.fit_transform(fft_all)
-    df['PC1'] = fft_all[:, 0]
-    df['PC2'] = fft_all[:, 1]
-    df['PC3'] = fft_all[:, 2]
+    df["PC1"] = fft_all[:, 0]
+    df["PC2"] = fft_all[:, 1]
+    df["PC3"] = fft_all[:, 2]
 
     return df
 
 
 def detect_outliers(df):
-    fft_all = df[['PC1', 'PC2', 'PC3']].to_numpy()
-    clf = IsolationForest(n_estimators=200, max_samples='auto', contamination=float(.03),
-                          max_features=1.0, bootstrap=False, n_jobs=-1, random_state=42, verbose=0)
+    fft_all = df[["PC1", "PC2", "PC3"]].to_numpy()
+    clf = IsolationForest(
+        n_estimators=200,
+        max_samples="auto",
+        contamination=float(0.03),
+        max_features=1.0,
+        bootstrap=False,
+        n_jobs=-1,
+        random_state=42,
+        verbose=0,
+    )
     clf.fit(fft_all)
 
     pred = clf.predict(fft_all)
-    df['anomaly'] = pred
+    df["anomaly"] = pred
     df = df.sample(frac=1)
     return df
 
@@ -233,41 +234,3 @@ def sample_tone_per(df, tone_per):
     df.reset_index(drop=True, inplace=True)
     print(f"# Samples Removed: {len(original_df) - len(df)} ")
     return df
-
-
-if __name__ == "__main__":
-
-    audio_data = pd.read_pickle(f'{ROOT_DIR}/data/processed/Pickle/audio_df.pkl')
-    audio_data = audio_data.dropna()
-
-    print('Removing Silence!')
-    df_count = len(audio_data)
-    audio_data = remove_silence(audio_data)
-    audio_data = audio_data[audio_data.new_duration < 2]
-    print(f"# Samples Removed: {df_count - len(audio_data)} ")
-
-    print('Data Augmentation!')
-    audio_data_aug = audio_augmentation(audio_data)
-
-    print('Removing Outliers!')
-    df_count = len(audio_data_aug)
-    audio_pca = pca_audio(audio_data_aug)
-    audio_pca = detect_outliers(audio_pca)
-    audio_inlier = audio_pca[audio_pca['anomaly'] == 1]
-    audio_inlier.reset_index(inplace=True, drop=True)
-    print(f"# Samples Removed: {df_count - len(audio_inlier)} ")
-
-    print('Speech Recognition Assessment!')
-    df_count = len(audio_inlier)
-    audio_cln = speech_recognition_assessment(audio_inlier)
-    audio_best = audio_cln[audio_cln['sound_quality'] <= 1]
-    print(f"# Samples Removed: {df_count - len(audio_best)} ")
-
-    print('Sampling Data!')
-    chinese_words = extract_words(print_total=False)
-    tone_per = get_tone_distrubtion(chinese_words)
-    audio_pr = sample_tone_per(audio_best, tone_per)
-
-    audio_pr.to_pickle(f"{ROOT_DIR}/data/processed/Pickle/audio_pr.pkl")
-    print(f"# Data Set Size: {len(audio_pr)}")
-    print('Process Done!')
