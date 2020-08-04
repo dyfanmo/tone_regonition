@@ -18,8 +18,8 @@ Train a machine learning model to classify tones in Chinese through audio files.
 ```sh
 # Download Audio files.
 mkdir data/raw
-wget https://www.dropbox.com/s/le1bc0e20sshu4b/Audio.zip?dl=0
-unzip Audio.zip
+wget https://www.dropbox.com/s/33f8lvgfjphnrzh/Audio.zip?dl=0
+unzip Audio.zip?dl=0
 mv Audio data/raw
 
 # Request more data. Insert api key from https://api.forvo.com/
@@ -29,7 +29,7 @@ python make_dataset.py --api_key=''
 python clean_data.py
 
 # Prepare training data.
-python data_loader.py 
+python prepare_data.py 
 ```
 
 # Run
