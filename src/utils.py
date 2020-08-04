@@ -7,19 +7,11 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import os.path as path
-
-ROOT_DIR = path.abspath(path.join(__file__, "../.."))
-DATA_PATH = ROOT_DIR + "/data"
-AUDIO_PATH = DATA_PATH + "/raw/Audio"
-CLEAN_PATH = DATA_PATH + "/processed/Audio/Clean"
-AUGMENTED_PATH = DATA_PATH + "/processed/Audio/Augmented"
-INTERIM_PATH = DATA_PATH + "/interim"
-SCORES_PATH = ROOT_DIR + "/data/scores"
-MODELS_PATH = ROOT_DIR + "/models"
-FIGURE_PATH = ROOT_DIR + '/figures'
+from IPython import get_ipython
 
 
 def speech_to_text(filename):
+    """ Transcribe audio files into text """
     r = sr.Recognizer()
     transcripts = []
     with sr.AudioFile(filename) as source:
@@ -38,6 +30,7 @@ def speech_to_text(filename):
 
 
 def text_to_tone(text):
+    """ Retrieve the tone of a character """
     tone = ''
     try:
         pin = pinyin.get(text, format='numerical')
@@ -65,6 +58,7 @@ def match_target_amplitude(aChunk, target_dBFS):
 
 
 def get_melspectrogram_db(file_path, duration=3, n_fft=2048, hop_length=512, n_mels=128):
+    """ Build Mel Spectrogram """
     wav, rate = librosa.load(file_path)
     input_length = rate * duration
     wav = librosa.util.fix_length(wav, round(input_length))
@@ -76,6 +70,7 @@ def get_melspectrogram_db(file_path, duration=3, n_fft=2048, hop_length=512, n_m
 
 
 def specgram_to_image(spec, eps=1e-6):
+    """ Covert Mel Spectrogram into an image """
     mean = spec.mean()
     std = spec.std()
     spec_norm = (spec - mean) / (std + eps)
@@ -86,17 +81,20 @@ def specgram_to_image(spec, eps=1e-6):
 
 
 def save_object(obj, filename):
+    """ Save an object"""
     with open(filename, 'wb') as output:  # Overwrites any existing file.
         pickle.dump(obj, output, pickle.HIGHEST_PROTOCOL)
 
 
 def load_object(filename):
+    """ Load an object """
     with open(filename, 'rb') as data:
         obj = pickle.load(data)
     return obj
 
 
 def get_audio_path(ser):
+    """ Get the audio path of a file """
     try:
         if ser.audio_type == 'CL':
             file_path = f"{ROOT_DIR}/data/processed/Audio/Clean/{ser.id}"
@@ -108,6 +106,7 @@ def get_audio_path(ser):
 
 
 class ToneData(Dataset):
+    """ Building spectrogram and add its label into a numpy array """
     def __init__(self, df, out_col, duration):
         self.df = df
         self.data = []
@@ -134,6 +133,7 @@ class ToneData(Dataset):
 
 
 def change_pitch(wav, rate, deep=True):
+    """ Manipulate the pitch within an audio file """
     bins_per_octave = 12
     pitch_change = np.random.uniform(0.5, 1.5)
     if deep:
@@ -143,9 +143,37 @@ def change_pitch(wav, rate, deep=True):
 
 
 def get_tone_dist(chinese_words):
+    """ Get the distribution of tones from all the Chinese characters """
     chinese_df = pd.DataFrame(chinese_words, columns=['word'])
     chinese_df['tone'] = chinese_df['word'].apply(lambda word: text_to_tone(word))
     tone_count = chinese_df['tone'].value_counts()
     tone_per = tone_count / tone_count.sum()
     return tone_per
+
+
+def isnotebook():
+    """ Return boolean if code is implemented within a notebook """
+    try:
+        shell = get_ipython().__class__.__name__
+        if shell == 'ZMQInteractiveShell':
+            return True   # Jupyter notebook or qtconsole
+        elif shell == 'TerminalInteractiveShell':
+            return False  # Terminal running IPython
+        else:
+            return False  # Other type (?)
+    except NameError:
+        return False
+
+
+ROOT_DIR = path.abspath(path.join(__file__, "../.."))
+DATA_PATH = ROOT_DIR + "/data/"
+MODELS_PATH = ROOT_DIR + "/models/"
+FIGURE_PATH = ROOT_DIR + '/figures/'
+AUDIO_PATH = DATA_PATH + "raw/Audio/"
+PROCESSED_PATH = DATA_PATH + "processed/"
+PICKLE_PATH = PROCESSED_PATH + 'Pickle/'
+CLEAN_PATH = PROCESSED_PATH + "Audio/Clean/"
+AUGMENTED_PATH = PROCESSED_PATH + "Audio/Augmented/"
+INTERIM_PATH = DATA_PATH + "interim/"
+SCORES_PATH = DATA_PATH + "scores/"
 

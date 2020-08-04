@@ -9,8 +9,7 @@ numpy
 pandas
 matplotlib
 IPython
-torchvision
 translate
 scikit-learn
 requests
-ffmpeg
+torchvision
