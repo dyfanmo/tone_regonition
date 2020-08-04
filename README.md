@@ -33,7 +33,7 @@ python prepare_data.py
 ```
 
 # Run
-You can see more configurations in [configs](src/configs)
+You can see more configurations in [configs](src/configs.py)
 
 ## Train
 ```sh
