@@ -23,7 +23,7 @@ unzip Audio.zip?dl=0
 mv Audio data/raw
 
 # Request more data. Insert api key from https://api.forvo.com/
-python make_dataset.py --api_key=''
+python make_dataset.py 
 
 # Clean the audio files.
 python clean_data.py
@@ -33,7 +33,7 @@ python prepare_data.py
 ```
 
 # Run
-You can see more configurations in [configs](src/configs) folder
+You can see more configurations in [configs](src/configs)
 
 ## Train
 ```sh
