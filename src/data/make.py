@@ -115,4 +115,4 @@ def build_dataframe(data_list):
     return df
 
 
-API_KEY = '2e3cb6041dea7f1b91e9d75e5b1c1415'
+API_KEY = ''
