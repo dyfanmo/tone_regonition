@@ -1,5 +1,6 @@
 # Tone Regonition
 
+[SM: Add some text outlining the data engineering you've done - it's a massive part of the repo and took more time than the ML section.]
 Train a machine learning model to classify tones in Chinese through audio files.
 
 # Prerequisites
