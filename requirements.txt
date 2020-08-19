@@ -1,0 +1,14 @@
+requests
+pandas
+hanzidentifier
+tqdm
+pydub
+librosa
+numpy
+soundfile
+scikit-learn
+pinyin
+ipython
+yaml
+pyyaml
+matplotlib
