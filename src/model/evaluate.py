@@ -11,7 +11,7 @@ if isnotebook():
     from tqdm.notebook import tqdm
 
 
-def load_trained_mddel(model):
+def load_trained_model(model):
     model_name = model.__class__.__name__
     model_name = str(model_name.strip())
     model.load_state_dict(torch.load(f'{MODELS_PATH}/{model_name}.pt', map_location='cpu'))
@@ -23,7 +23,7 @@ def test_models(test_pr, *models):
     results = []
     for model in models:
         model_name = model.__class__.__name__
-        model = load_trained_mddel(model)
+        model = load_trained_model(model)
         with torch.no_grad():
             trace_y1, trace_y2, trace_yhat1, trace_yhat2 = setup_trace_y_variables()
             for data in tqdm(test_pr):
