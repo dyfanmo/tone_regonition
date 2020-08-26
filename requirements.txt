@@ -12,3 +12,4 @@ ipython
 yaml
 pyyaml
 matplotlib
+SpeechRecognition
