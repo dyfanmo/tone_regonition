@@ -9,7 +9,6 @@ soundfile
 scikit-learn
 pinyin
 ipython
-yaml
 pyyaml
 matplotlib
 SpeechRecognition
